@@ -148,7 +148,7 @@ function begin($o, $s, $r1, $r2, $da) {
 	if ($operation == "add") {
 		addition($matrixarray);
 	} else {
-		multiplication();
+		multiplication($matrixarray);
 	}
 }
 
@@ -165,39 +165,34 @@ function displayMatrix($m) {
 }
 
 function addition($matrixarray) {
-	// MATRIX A
-	echo "<div style=\"float: left\">";
-	displayMatrix($matrixarray[0][0]);
-	echo "</div>";
 	
-	// OPERATION
-	echo "<div style=\"float: left; padding: 20px;\">+</div>";
+	for ($i = 0; $i < count($matrixarray); $i++) {
+		echo "<div style=\"float: left\">";
+		displayMatrix($matrixarray[$i][0]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">+</div>";
+		echo "<div style=\"float: left\">";
+		displayMatrix($matrixarray[$i][1]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">=</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+	}
 	
-	// MATRIX B
-	echo "<div style=\"float: left\">";
-	displayMatrix($matrixarray[0][1]);
-	echo "</div>";
-
-	// EQUALS
-	echo "<div style=\"float: left; padding: 20px;\">=</div>";
 }
 
-function multiplication() {
-	// MATRIX A
-	echo "<div style=\"float: left\">";
-	displayMatrix($matrix1);
-	echo "</div>";
+function multiplication($matrixarray) {
 	
-	// OPERATION
-	echo "<div style=\"float: left; padding: 20px;\">X</div>";
-	
-	// MATRIX B
-	echo "<div style=\"float: left\">";
-	displayMatrix($matrix2);
-	echo "</div>";
-
-	// EQUALS
-	echo "<div style=\"float: left; padding: 20px;\">=</div>";
+	for ($i = 0; $i < count($matrixarray); $i++) {
+		echo "<div style=\"float: left\">";
+		displayMatrix($matrixarray[$i][0]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">X</div>";
+		echo "<div style=\"float: left\">";
+		displayMatrix($matrixarray[$i][1]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">=</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+	}
 }
 
 function generateMatrices($size, $displayamount, $lowerBound, $upperBound) {
@@ -213,35 +208,119 @@ function generateMatrices($size, $displayamount, $lowerBound, $upperBound) {
 		}
 	} elseif ($size == "3x3") {
 		for ($i = 0; $i < $displayamount; $i++) {
-			
+			$matrixarray[$i] = array();
+			for ($j = 0; $j < 2; $j++) {
+				$matrixarray[$i][$j] = new Matrix([
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)]
+				]);
+			}
 		}
 	} elseif ($size == "4x4") {
 		for ($i = 0; $i < $displayamount; $i++) {
-			
+			$matrixarray[$i] = array();
+			for ($j = 0; $j < 2; $j++) {
+				$matrixarray[$i][$j] = new Matrix([
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)]
+				]);
+			}
 		}
 	} elseif ($size == "5x5") {
 		for ($i = 0; $i < $displayamount; $i++) {
-			
+			$matrixarray[$i] = array();
+			for ($j = 0; $j < 2; $j++) {
+				$matrixarray[$i][$j] = new Matrix([
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)]
+				]);
+			}
 		}
 	} elseif ($size == "6x6") {
 		for ($i = 0; $i < $displayamount; $i++) {
-			
+			$matrixarray[$i] = array();
+			for ($j = 0; $j < 2; $j++) {
+				$matrixarray[$i][$j] = new Matrix([
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)]
+				]);
+			}
 		}
 	} elseif ($size == "7x7") {
 		for ($i = 0; $i < $displayamount; $i++) {
-			
+			$matrixarray[$i] = array();
+			for ($j = 0; $j < 2; $j++) {
+				$matrixarray[$i][$j] = new Matrix([
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)]
+				]);
+			}
 		}
 	} elseif ($size == "8x8") {
 		for ($i = 0; $i < $displayamount; $i++) {
-			
+			$matrixarray[$i] = array();
+			for ($j = 0; $j < 2; $j++) {
+				$matrixarray[$i][$j] = new Matrix([
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)]
+				]);
+			}
 		}
 	} elseif ($size == "9x9") {
 		for ($i = 0; $i < $displayamount; $i++) {
-			
+			$matrixarray[$i] = array();
+			for ($j = 0; $j < 2; $j++) {
+				$matrixarray[$i][$j] = new Matrix([
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)]
+				]);
+			}
 		}
 	} elseif ($size == "10x10") {
 		for ($i = 0; $i < $displayamount; $i++) {
-			
+			$matrixarray[$i] = array();
+			for ($j = 0; $j < 2; $j++) {
+				$matrixarray[$i][$j] = new Matrix([
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)],
+					[rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound), rand($lowerBound,$upperBound)]
+				]);
+			}
 		}
 	}
 	return $matrixarray;
