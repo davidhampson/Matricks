@@ -1,0 +1,87 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  $("#teacher").click(function(){
+    $("button").hide();
+    $("h2").hide();
+    $("h4").hide();
+    $("#teacherkey").show();
+  });
+  $("#student").click(function(){
+    $("button").hide();
+    $("h2").hide();
+    $("h4").hide();
+    $("#studentkey").show();
+  });
+});
+</script>
+</head>
+<body>
+<h1> Online Matrix Quiz Generator</h1>
+<h2>Are you a...</h2>
+
+<button id="teacher">Teacher</button>
+<h4>or</h4>
+<button id="student">Student</button>
+
+<form id="teacherkey" style="display:none" action="Generator.php" method="post">
+  Name (John Smith, Mr. Smith, Dr. Smith):<br>
+  <input type="text" name="name">
+  <br>
+  Class (Grade 12 Mathematics, MATH101):<br>
+  <input type="text" name="class">
+  <br>
+  Please select the desired matrix operation:<br>
+  <select name="operations">
+  <option value="add">Addition</option>  
+  <option value="multi">Multiplication</option>
+  </select>
+  <br>
+  Please select the desired matrix size:<br>
+  <select name="msize">
+  <option value="2x2">2x2</option>
+  <option value="3x3">3x3</option>  
+  <option value="4x4">4x4</option>
+  <option value="5x5">5x5</option>  
+  <option value="6x6">6x6</option>
+  <option value="7x7">7x7</option>  
+  <option value="8x8">8x8</option>
+  <option value="9x9">9x9</option>  
+  <option value="10x10">10x10</option>
+  </select>
+  <br>
+  Please specify number selection range:<br>
+  <input type="number" name="range1" value=0>x<input type="number" name="range2" value=0>
+  <br>
+  How many questions do you want?:<br>
+  <input type="number" name="displayamount" value=1>
+  <br>
+  Do you want a PDF copy?<br>
+  <select name="pdf">
+  <option value="makePDF">Yes</option>
+  <option value="noPDF">No</option>
+  </select>
+  <br><br>
+  <input type="submit" value="Go" id="teachersub">
+</form>
+    
+<form id="studentkey" style="display:none" action="">
+  First name:<br>
+  <input type="text" name="firstname">
+  <br>
+  Last name:<br>
+  <input type="text" name="lastname">
+  <br>
+  Student ID (if applicable):<br>
+  <input type="text" name="studentid">
+  <br>
+  Class key (given by your teacher/professor):<br>
+  <input type="text" name="classid">
+  <br><br>
+  <input type="submit" value="Go" id="studentsub">
+</form> 
+    
+</body>
+</html>
