@@ -7,7 +7,7 @@ include("MatrixException.php");
 include("LUDecomposition.php");
 use MCordingley\LinearAlgebra\Matrix;
 
-function begin($o, $s, $r1, $r2, $da) {
+function begin($identity, $o, $s, $r1, $r2, $da) {
 	$operation = $o;
 	$size = $s;
 	$displayamount = $da;
@@ -24,13 +24,13 @@ function begin($o, $s, $r1, $r2, $da) {
 		$matrixarray = retrieveMatrices($size, $displayamount);
 	}
 	if ($operation == "add") {
-		addition($matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+		addition($identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
 	} else {
-		multiplication($matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+		multiplication($identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
 	}
 }
 
-function addition($matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+function addition($identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
 	
 	for ($i = 0; $i < count($matrixarray); $i++) {
 		echo "<div style=\"float: left\">";
@@ -42,13 +42,14 @@ function addition($matrixarray, $operation, $size, $displayamount, $upperBound, 
 		echo "</div>";
 		echo "<div style=\"float: left; padding: 20px;\">=</div>";
 		echo "<div style=\"float: left\">";
-		displayAnswer($i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
-		//echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+		displayAnswer($identity, $i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
+		echo "</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
 	}
 	
 }
 
-function multiplication($matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+function multiplication($identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
 	
 	for ($i = 0; $i < count($matrixarray); $i++) {
 		echo "<div style=\"float: left\">";
@@ -60,8 +61,9 @@ function multiplication($matrixarray, $operation, $size, $displayamount, $upperB
 		echo "</div>";
 		echo "<div style=\"float: left; padding: 20px;\">=</div>";
 		echo "<div style=\"float: left\">";
-		displayAnswer($i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
-		//echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+		displayAnswer($identity, $i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
+		echo "</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
 	}
 }
 
@@ -77,7 +79,7 @@ function displayMatrix($m) {
 	echo "</tr></table>";
 }
 
-function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray) {
+function displayAnswer($identity, $k, $a, $b, $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray) {
 	if (isset($_POST["SUBMITTED"])) {
 		// SUBMISSION
 		echo "<div style=\"float: left\">";
@@ -99,8 +101,12 @@ function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBoun
 						$colour = "red";
 					}
 					// pass values
-					echo "<input style=\"background-color: $colour; color: white;\" type=\"text\" size=\"1\" name=\"userAns$n$i$j\" value = \"$userAns\">";
-				
+					if ($k == $n) {
+						echo "<input style=\"background-color: $colour; color: white;\" type=\"text\" size=\"1\" name=\"userAns$n$i$j\" value = \"$userAns\">";
+					} else {
+						echo "<input style=\"background-color: $colour; color: white;\" type=\"hidden\" size=\"1\" name=\"userAns$n$i$j\" value = \"$userAns\">";
+					}
+					
 					// hidden values
 					$arrayValuea = $matrixarray[$n][0]->get($i, $j);
 					$arrayValueb = $matrixarray[$n][1]->get($i, $j);
@@ -111,6 +117,13 @@ function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBoun
 				}
 				echo "<br>";
 			}
+		}
+		if ($identity === "Begin") {
+			echo "<input type=\"hidden\" name=\"STUDENT\" value=\"$identity\"/>";
+		} elseif ($identity === "Go") {
+			echo "<input type=\"hidden\" name=\"GUEST\" value=\"$identity\"/>";
+		} else {
+			echo "<input type=\"hidden\" name=\"TEACHER\" value=\"$identity\"/>";
 		}
 		echo "<input type=\"hidden\" name=\"operations\" value=\"$operation\"/>";
 		echo "<input type=\"hidden\" name=\"msize\" value=\"$size\"/>";
@@ -137,7 +150,11 @@ function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBoun
 					}
 					
 					// pass values
-					echo "<input type=\"text\" size=\"1\" name=\"userAns$n$i$j\">";
+					if ($k == $n) {
+						echo "<input type=\"text\" size=\"1\" name=\"userAns$n$i$j\">";
+					} else {
+						echo "<input type=\"hidden\" size=\"1\" name=\"userAns$n$i$j\">";
+					}
 				
 					// hidden values
 					$arrayValuea = $matrixarray[$n][0]->get($i, $j);
@@ -150,15 +167,23 @@ function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBoun
 				echo "<br>";
 			}
 		}
+		if ($identity === "Begin") {
+			echo "<input type=\"hidden\" name=\"STUDENT\" value=\"$identity\"/>";
+		} elseif ($identity === "Go") {
+			echo "<input type=\"hidden\" name=\"GUEST\" value=\"$identity\"/>";
+		} else {
+			echo "<input type=\"hidden\" name=\"TEACHER\" value=\"$identity\"/>";
+		}
 		echo "<input type=\"hidden\" name=\"operations\" value=\"$operation\"/>";
 		echo "<input type=\"hidden\" name=\"msize\" value=\"$size\"/>";
 		echo "<input type=\"hidden\" name=\"displayamount\" value=\"$displayamount\"/>";
 		echo "<input type=\"hidden\" name=\"range2\" value=\"$upperBound\"/>";
 		echo "<input type=\"hidden\" name=\"range1\" value=\"$lowerBound\"/>";
 		// submit button
-		echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div></div>";
+		echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
 		echo "<br style=\"clear: both\">";
 	}
+	echo "</div></div>";
 }
 
 function generateMatrices($size, $displayamount, $lowerBound, $upperBound) {
@@ -468,5 +493,49 @@ function retrieveMatrices($size, $displayamount) {
 	return $matrixarray;
 }
 
-begin($_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"]);
+if (isset($_POST["STUDENT"]) && isset($_POST["SUBMITTED"])){
+	$ansCount = 0;
+	$operation = $_POST["operations"];
+	$displayamount = $_POST["displayamount"];
+	$size = $_POST["msize"];
+	$r1 = $_POST["range1"];
+	$r2 = $_POST["range2"];
+	if ($r1 > $r2) {
+		$upperBound = $r1;
+		$lowerBound = $r2;
+	} else {
+		$lowerBound = $r1;
+		$upperBound = $r2;
+	}
+	$matrixarray = retrieveMatrices($size, $displayamount);
+	for ($n = 0; $n < $displayamount; $n++) {
+		for ($i = 0; $i < $matrixarray[0][0]->getRowCount(); $i++) {
+			for ($j = 0; $j < $matrixarray[0][0]->getColumnCount(); $j++) {
+				if ($operation == "add") {
+					$solution = $matrixarray[$n][0]->addMatrix($matrixarray[$n][1]);
+				} else {
+					$solution = $matrixarray[$n][0]->multiplyMatrix($matrixarray[$n][1]);
+				}
+				$userAns = intval($_POST["userAns$n$i$j"]);
+				$realAns = intval($_POST["ANS$n$i$j"]);
+				if ($userAns == $realAns) {
+					$colour = "green";
+					$ansCount++;
+				} else {
+					$colour = "red";
+				}
+			}
+		}
+	}
+	echo "<h1>$ansCount/$displayamount</h1>";
+} else {
+	if (!empty($_POST["STUDENT"])) {
+		begin($_POST["STUDENT"], $_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"]);
+	} elseif (!empty($_POST["TEACHER"])){
+		begin($_POST["TEACHER"], $_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"]);
+	} else {
+		begin($_POST["GUEST"], $_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"]);
+	}
+}
+
 ?>
