@@ -130,10 +130,10 @@ function displayAnswer($identity, $k, $a, $b, $operation, $size, $displayamount,
 		echo "<input type=\"hidden\" name=\"displayamount\" value=\"$displayamount\"/>";
 		echo "<input type=\"hidden\" name=\"range2\" value=\"$upperBound\"/>";
 		echo "<input type=\"hidden\" name=\"range1\" value=\"$lowerBound\"/>";
-		// submit/reset
-		echo "<table><td>";
-		echo "<input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
-		echo "</td><td><input type=\"submit\" value=\"Reset\" name=\"RESET\"></form></div></td></table>";
+		// submit
+		if ($k == $displayamount-1) {
+			echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
+		}
 		echo "<div style=\"float: left\">";
 		echo "<br style=\"clear: both\">";
 	} else {
@@ -180,7 +180,9 @@ function displayAnswer($identity, $k, $a, $b, $operation, $size, $displayamount,
 		echo "<input type=\"hidden\" name=\"range2\" value=\"$upperBound\"/>";
 		echo "<input type=\"hidden\" name=\"range1\" value=\"$lowerBound\"/>";
 		// submit button
-		echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
+		if ($k == $displayamount-1) {
+			echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
+		}
 		echo "<br style=\"clear: both\">";
 	}
 	echo "</div></div>";
