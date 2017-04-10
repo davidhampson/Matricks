@@ -7,10 +7,7 @@ include("MatrixException.php");
 include("LUDecomposition.php");
 use MCordingley\LinearAlgebra\Matrix;
 
-function begin($o, $s, $r1, $r2, $da) {
-	$operation = $o;
-	$size = $s;
-	$displayamount = $da;
+function Initiate($teachname, $classname, $identity, $operation, $size, $r1, $r2, $displayamount) {
 	if ($r1 > $r2) {
 		$upperBound = $r1;
 		$lowerBound = $r2;
@@ -18,54 +15,266 @@ function begin($o, $s, $r1, $r2, $da) {
 		$lowerBound = $r1;
 		$upperBound = $r2;
 	}
+	
 	if (!isset($_POST["SUBMITTED"])) {
-		$matrixarray = generateMatrices($size, $displayamount, $lowerBound, $upperBound);
+		$matrixarray = GenerateMatrices($size, $displayamount, $lowerBound, $upperBound);
 	} else {
-		$matrixarray = retrieveMatrices($size, $displayamount);
+		$matrixarray = RetrieveMatrices($size, $displayamount);
 	}
+	if ($identity === "Initiate" && !isset($_POST["SUBMITTED"])) {
+		$uniqueid = MySQLInit($teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+	}
+	
+	echo "To access the student's results, you can go to kymotsujason.ca/qgen/Generator.php?id=$uniqueid";
+	echo "<br>";
+	echo "Students can take the test by going to the homepage (kymotsujason.ca/qgen), <br>
+	pressing the 'students' button and entering the following 'class id' or unique id: $uniqueid";
+	echo "<br>";
 	if ($operation == "add") {
-		addition($matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+		echo "<h1>$size Matrix Addition quiz </h1>";
+		echo "<h2>Class: $classname by: $teachname </h2>";
+		TeachAddition($uniqueid, $teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
 	} else {
-		multiplication($matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+		echo "<h1>$size Matrix Multiplication quiz </h1>";
+		echo "<h2>Class: $classname by: $teachname </h2>";
+		TeachMultiplication($uniqueid, $teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
 	}
 }
 
-function addition($matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+function Go($identity, $o, $s, $r1, $r2, $da) {
+	$operation = $o;
+	$size = $s;
+	$displayamount = $da;
+	$uniqueid = uniqid();
+	
+	if ($r1 > $r2) {
+		$upperBound = $r1;
+		$lowerBound = $r2;
+	} else {
+		$lowerBound = $r1;
+		$upperBound = $r2;
+	}
+	
+	if (!isset($_POST["SUBMITTED"])) {
+		$matrixarray = GenerateMatrices($size, $displayamount, $lowerBound, $upperBound);
+	} else {
+		$matrixarray = RetrieveMatrices($size, $displayamount);
+	}
+	
+	if ($operation == "add") {
+		echo "<h1>$size Matrix Addition quiz </h1>";
+		GuestAddition($uniqueid, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+	} else {
+		echo "<h1>$size Matrix Multiplication quiz </h1>";
+		GuestMultiplication($uniqueid, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+	}
+}
+
+function Begin($identity, $uniqueid, $firstname, $lastname, $studentid) {
+	$link = new mysqli("localhost", "kymot_qgen", "cmpt386isaclass", "kymotsujason_qgen");
+	if (!$link->connect_error) {
+		$sqlSelect = "SELECT teachername, classname, moperation, msize, mrange1, mrange2, mdisplayamount, element FROM class WHERE uniqueid='$uniqueid'";
+		$result = $link->query($sqlSelect);
+		if ($result->num_rows > 0) {
+			$row = $result->fetch_assoc();
+			$teachname = $row["teachername"];
+			$classname = $row["classname"];
+			$operation = $row["moperation"];
+			$size = $row["msize"];
+			$displayamount = $row["mdisplayamount"];
+			$lowerBound = $row["mrange1"];
+			$upperBound = $row["mrange1"];
+			$element = $row["element"];
+		}
+	} else {
+		echo "Houston, we have a problem <br>";
+		echo "Where the *beep* is the mysql server?";
+	}
+	
+	if (isset($_POST["showresult"])) {
+		$matrixarray = RetrieveMatrices($size, $displayamount);
+	} else {
+		$matrixarray = ReconstructMatrices($size, $displayamount, $element);
+	}
+	
+	
+	if ($operation == "add") {
+		echo "<h1>$size Matrix Addition quiz </h1>";
+		echo "<h2>Class: $classname by: $teachname </h2>";
+		echo "<h3>Student: $firstname $lastname Student id: $studentid</h3>";
+		Addition($uniqueid, $firstname, $lastname, $studentid, $teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+	} else {
+		echo "<h1>$size Matrix Multiplication quiz </h1>";
+		echo "<h2>Class: $classname by: $teachname </h2>";
+		echo "<h3>Student: $firstname $lastname</h3>";
+		Multiplication($uniqueid, $firstname, $lastname, $studentid, $teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound);
+	}
+	$link->close();
+}
+
+function MySQLInit($teachname, $classname, $identity, $m, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+	$uniqueid = uniqid();
+	$class = $classname;
+	$link = new mysqli("localhost", "kymot_qgen", "cmpt386isaclass", "kymotsujason_qgen");
+	$elements = "";
+	for ($n = 0; $n < $displayamount; $n++) {
+		for ($k = 0; $k < 2; $k++) {
+			for ($i = 0; $i < $m[0][0]->getRowCount(); $i++) {
+				for ($j = 0; $j < $m[0][0]->getColumnCount(); $j++) {
+					if ($j != $m[0][0]->getRowCount()-1) {
+						$elements .= $m[$n][$k]->get($i, $j) . ",";
+					} elseif ($j == $m[0][0]->getRowCount()-1) {
+						$elements .= $m[$n][$k]->get($i, $j);
+					}
+				}
+				if ($i != $m[0][0]->getColumnCount()-1) {
+					$elements .= "|";
+				}
+			}
+			if ($k != $m[0][0]->getColumnCount()-1) {
+				$elements .= ":";
+			}
+		}
+		if ($n != $m[0][0]->getColumnCount()-1) {
+			$elements .= "_";
+		}
+	}
+	if (!$link->connect_error) {
+		$sqlInsert = "INSERT INTO class (uniqueid, teachername, classname, moperation, msize, mrange1, mrange2, mdisplayamount, element)
+		VALUES ('$uniqueid', '$teachname', '$class', '$operation', '$size', '$lowerBound', '$upperBound', '$displayamount', '$elements')";
+		$link->query($sqlInsert);
+	} else {
+		echo "Houston, we have a problem <br>";
+		echo "Where the *beep* is the mysql server?";
+	}
+	$link->close();
+	return $uniqueid;
+}
+
+function Addition($uniqueid, $firstname, $lastname, $studentid, $teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
 	
 	for ($i = 0; $i < count($matrixarray); $i++) {
+		$qnum = $i+1;
+		echo "<h4>Q$qnum</h4>";
 		echo "<div style=\"float: left\">";
-		displayMatrix($matrixarray[$i][0]);
+		DisplayMatrix($matrixarray[$i][0]);
 		echo "</div>";
 		echo "<div style=\"float: left; padding: 20px;\">+</div>";
 		echo "<div style=\"float: left\">";
-		displayMatrix($matrixarray[$i][1]);
+		DisplayMatrix($matrixarray[$i][1]);
 		echo "</div>";
 		echo "<div style=\"float: left; padding: 20px;\">=</div>";
 		echo "<div style=\"float: left\">";
-		displayAnswer($i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
-		//echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+		SubmitAnswer($uniqueid, $firstname, $lastname, $studentid, $identity, $i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
+		echo "</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
 	}
 	
 }
 
-function multiplication($matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+function TeachAddition($uniqueid, $teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
 	
 	for ($i = 0; $i < count($matrixarray); $i++) {
+		$qnum = $i+1;
+		echo "<h4>Q$qnum</h4>";
 		echo "<div style=\"float: left\">";
-		displayMatrix($matrixarray[$i][0]);
+		DisplayMatrix($matrixarray[$i][0]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">+</div>";
+		echo "<div style=\"float: left\">";
+		DisplayMatrix($matrixarray[$i][1]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">=</div>";
+		echo "<div style=\"float: left\">";
+		DisplayAnswer($uniqueid, $identity, $i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
+		echo "</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+	}
+	
+}
+
+function GuestAddition($uniqueid, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+	
+	for ($i = 0; $i < count($matrixarray); $i++) {
+		$qnum = $i+1;
+		echo "<h4>Q$qnum</h4>";
+		echo "<div style=\"float: left\">";
+		DisplayMatrix($matrixarray[$i][0]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">+</div>";
+		echo "<div style=\"float: left\">";
+		DisplayMatrix($matrixarray[$i][1]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">=</div>";
+		echo "<div style=\"float: left\">";
+		DisplayAnswer($uniqueid, $identity, $i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
+		echo "</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+	}
+	
+}
+
+function Multiplication($uniqueid, $firstname, $lastname, $studentid, $teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+	
+	for ($i = 0; $i < count($matrixarray); $i++) {
+		$qnum = $i+1;
+		echo "<h4>Q$qnum</h4>";
+		echo "<div style=\"float: left\">";
+		DisplayMatrix($matrixarray[$i][0]);
 		echo "</div>";
 		echo "<div style=\"float: left; padding: 20px;\">X</div>";
 		echo "<div style=\"float: left\">";
-		displayMatrix($matrixarray[$i][1]);
+		DisplayMatrix($matrixarray[$i][1]);
 		echo "</div>";
 		echo "<div style=\"float: left; padding: 20px;\">=</div>";
 		echo "<div style=\"float: left\">";
-		displayAnswer($i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
-		//echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+		SubmitAnswer($uniqueid, $firstname, $lastname, $studentid, $identity, $i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
+		echo "</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
 	}
 }
 
-function displayMatrix($m) {
+function TeachMultiplication($uniqueid, $teachname, $classname, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+	
+	for ($i = 0; $i < count($matrixarray); $i++) {
+		$qnum = $i+1;
+		echo "<h4>Q$qnum</h4>";
+		echo "<div style=\"float: left\">";
+		DisplayMatrix($matrixarray[$i][0]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">X</div>";
+		echo "<div style=\"float: left\">";
+		DisplayMatrix($matrixarray[$i][1]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">=</div>";
+		echo "<div style=\"float: left\">";
+		DisplayAnswer($uniqueid, $identity, $i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
+		echo "</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+	}
+}
+
+function GuestMultiplication($uniqueid, $identity, $matrixarray, $operation, $size, $displayamount, $upperBound, $lowerBound) {
+	
+	for ($i = 0; $i < count($matrixarray); $i++) {
+		$qnum = $i+1;
+		echo "<h4>Q$qnum</h4>";
+		echo "<div style=\"float: left\">";
+		DisplayMatrix($matrixarray[$i][0]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">X</div>";
+		echo "<div style=\"float: left\">";
+		DisplayMatrix($matrixarray[$i][1]);
+		echo "</div>";
+		echo "<div style=\"float: left; padding: 20px;\">=</div>";
+		echo "<div style=\"float: left\">";
+		DisplayAnswer($uniqueid, $identity, $i, $matrixarray[$i][0], $matrixarray[$i][1], $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray);
+		echo "</div>";
+		echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+	}
+}
+
+function DisplayMatrix($m) {
 	echo "<table style=\"border: 1px solid black; font-family:Consolas; line-height:25px;\"><tr>";
 	for ($i = 0; $i < $m->getColumnCount(); $i++) {
 		for ($j = 0; $j < $m->getRowCount(); $j++) {
@@ -77,7 +286,7 @@ function displayMatrix($m) {
 	echo "</tr></table>";
 }
 
-function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray) {
+function DisplayAnswer($uniqueid, $identity, $k, $a, $b, $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray) {
 	if (isset($_POST["SUBMITTED"])) {
 		// SUBMISSION
 		echo "<div style=\"float: left\">";
@@ -99,8 +308,12 @@ function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBoun
 						$colour = "red";
 					}
 					// pass values
-					echo "<input style=\"background-color: $colour; color: white;\" type=\"text\" size=\"1\" name=\"userAns$n$i$j\" value = \"$userAns\">";
-				
+					if ($k == $n) {
+						echo "<input style=\"background-color: $colour; color: white;\" type=\"text\" size=\"1\" name=\"userAns$n$i$j\" value = \"$userAns\">";
+					} else {
+						echo "<input style=\"background-color: $colour; color: white;\" type=\"hidden\" size=\"1\" name=\"userAns$n$i$j\" value = \"$userAns\">";
+					}
+					
 					// hidden values
 					$arrayValuea = $matrixarray[$n][0]->get($i, $j);
 					$arrayValueb = $matrixarray[$n][1]->get($i, $j);
@@ -112,15 +325,20 @@ function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBoun
 				echo "<br>";
 			}
 		}
+		if ($identity === "Go") {
+			echo "<input type=\"hidden\" name=\"GUEST\" value=\"$identity\"/>";
+		} else {
+			echo "<input type=\"hidden\" name=\"TEACHER\" value=\"$identity\"/>";
+		}
 		echo "<input type=\"hidden\" name=\"operations\" value=\"$operation\"/>";
 		echo "<input type=\"hidden\" name=\"msize\" value=\"$size\"/>";
 		echo "<input type=\"hidden\" name=\"displayamount\" value=\"$displayamount\"/>";
 		echo "<input type=\"hidden\" name=\"range2\" value=\"$upperBound\"/>";
 		echo "<input type=\"hidden\" name=\"range1\" value=\"$lowerBound\"/>";
-		// submit/reset
-		echo "<table><td>";
-		echo "<input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
-		echo "</td><td><input type=\"submit\" value=\"Reset\" name=\"RESET\"></form></div></td></table>";
+		// submit
+		if ($k == 0) {
+			echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
+		}
 		echo "<div style=\"float: left\">";
 		echo "<br style=\"clear: both\">";
 	} else {
@@ -137,7 +355,11 @@ function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBoun
 					}
 					
 					// pass values
-					echo "<input type=\"text\" size=\"1\" name=\"userAns$n$i$j\">";
+					if ($k == $n) {
+						echo "<input type=\"text\" size=\"1\" name=\"userAns$n$i$j\">";
+					} else {
+						echo "<input type=\"hidden\" size=\"1\" name=\"userAns$n$i$j\">";
+					}
 				
 					// hidden values
 					$arrayValuea = $matrixarray[$n][0]->get($i, $j);
@@ -150,18 +372,126 @@ function displayAnswer($i, $a, $b, $operation, $size, $displayamount, $upperBoun
 				echo "<br>";
 			}
 		}
+		if ($identity === "Go") {
+			echo "<input type=\"hidden\" name=\"GUEST\" value=\"$identity\"/>";
+		} else {
+			echo "<input type=\"hidden\" name=\"TEACHER\" value=\"$identity\"/>";
+		}
 		echo "<input type=\"hidden\" name=\"operations\" value=\"$operation\"/>";
 		echo "<input type=\"hidden\" name=\"msize\" value=\"$size\"/>";
 		echo "<input type=\"hidden\" name=\"displayamount\" value=\"$displayamount\"/>";
 		echo "<input type=\"hidden\" name=\"range2\" value=\"$upperBound\"/>";
 		echo "<input type=\"hidden\" name=\"range1\" value=\"$lowerBound\"/>";
 		// submit button
-		echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div></div>";
+		//if ($k == 0) {
+			echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
+		//}
 		echo "<br style=\"clear: both\">";
 	}
+	echo "</div></div>";
 }
 
-function generateMatrices($size, $displayamount, $lowerBound, $upperBound) {
+function SubmitAnswer($uniqueid, $firstname, $lastname, $studentid, $identity, $k, $a, $b, $operation, $size, $displayamount, $upperBound, $lowerBound, $matrixarray) {
+	if (isset($_POST["showresult"])) {
+		// SUBMISSION
+		echo "<div style=\"float: left\">";
+		echo "<form method=\"POST\" id=\"submission\">";
+		for ($n = 0; $n < $displayamount; $n++) {
+			for ($i = 0; $i < $matrixarray[0][0]->getRowCount(); $i++) {
+				for ($j = 0; $j < $matrixarray[0][0]->getColumnCount(); $j++) {
+					if ($operation == "add") {
+						$solution = $matrixarray[$n][0]->addMatrix($matrixarray[$n][1]);
+					} else {
+						$solution = $matrixarray[$n][0]->multiplyMatrix($matrixarray[$n][1]);
+					}
+					
+					$userAns = intval($_POST["userAns$n$i$j"]);
+					$realAns = intval($_POST["ANS$n$i$j"]);
+					if ($userAns == $realAns) {
+						$colour = "green";
+					} else {
+						$colour = "red";
+					}
+					// pass values
+					if ($k == $n) {
+						echo "<input style=\"background-color: $colour; color: white;\" type=\"text\" size=\"1\" name=\"userAns$n$i$j\" value = \"$userAns\">";
+					} else {
+						echo "<input style=\"background-color: $colour; color: white;\" type=\"hidden\" size=\"1\" name=\"userAns$n$i$j\" value = \"$userAns\">";
+					}
+					
+					// hidden values
+					$arrayValuea = $matrixarray[$n][0]->get($i, $j);
+					$arrayValueb = $matrixarray[$n][1]->get($i, $j);
+					$sol = $solution->get($i, $j);
+					echo "<input type=\"hidden\" name=\"ANS$n$i$j\" value=\"$sol\"/>";
+					echo "<input type=\"hidden\" name=\"a$n$i$j\" value=\"$arrayValuea\"/>";
+					echo "<input type=\"hidden\" name=\"b$n$i$j\" value=\"$arrayValueb\"/>";
+				}
+				echo "<br>";
+			}
+		}
+		if ($identity === "Go") {
+			echo "<input type=\"hidden\" name=\"GUEST\" value=\"$identity\"/>";
+		} else {
+			echo "<input type=\"hidden\" name=\"TEACHER\" value=\"$identity\"/>";
+		}
+		echo "<input type=\"hidden\" name=\"operations\" value=\"$operation\"/>";
+		echo "<input type=\"hidden\" name=\"msize\" value=\"$size\"/>";
+		echo "<input type=\"hidden\" name=\"displayamount\" value=\"$displayamount\"/>";
+		echo "<input type=\"hidden\" name=\"range2\" value=\"$upperBound\"/>";
+		echo "<input type=\"hidden\" name=\"range1\" value=\"$lowerBound\"/>";
+		echo "<div style=\"float: left\">";
+		echo "<br style=\"clear: both\">";
+	} else {
+		echo "<div style=\"float: left\">";
+		echo "<form method=\"POST\" id=\"submission\">";
+		for ($n = 0; $n < $displayamount; $n++) {
+			for ($i = 0; $i < $matrixarray[0][0]->getRowCount(); $i++) {
+				for ($j = 0; $j < $matrixarray[0][0]->getColumnCount(); $j++) {
+					if ($operation == "add") {
+						$solution = $matrixarray[$n][0]->addMatrix($matrixarray[$n][1]);
+					} else {
+						$solution = $matrixarray[$n][0]->multiplyMatrix($matrixarray[$n][1]);
+					}
+					
+					// pass values
+					if ($k == $n) {
+						echo "<input type=\"text\" size=\"1\" name=\"userAns$n$i$j\">";
+					} else {
+						echo "<input type=\"hidden\" size=\"1\" name=\"userAns$n$i$j\">";
+					}
+				
+					// hidden values
+					$arrayValuea = $matrixarray[$n][0]->get($i, $j);
+					$arrayValueb = $matrixarray[$n][1]->get($i, $j);
+					$sol = $solution->get($i, $j);
+					echo "<input type=\"hidden\" name=\"ANS$n$i$j\" value=\"$sol\"/>";
+					echo "<input type=\"hidden\" name=\"a$n$i$j\" value=\"$arrayValuea\"/>";
+					echo "<input type=\"hidden\" name=\"b$n$i$j\" value=\"$arrayValueb\"/>";
+				}
+				echo "<br>";
+			}
+		}
+		echo "<input type=\"hidden\" name=\"STUDENT\" value=\"$identity\"/>";
+		echo "<input type=\"hidden\" name=\"id\" value=\"$uniqueid\"/>";
+		echo "<input type=\"hidden\" name=\"first\" value=\"$firstname\"/>";
+		echo "<input type=\"hidden\" name=\"last\" value=\"$lastname\"/>";
+		echo "<input type=\"hidden\" name=\"studentid\" value=\"$studentid\"/>";
+		echo "<input type=\"hidden\" name=\"operations\" value=\"$operation\"/>";
+		echo "<input type=\"hidden\" name=\"msize\" value=\"$size\"/>";
+		echo "<input type=\"hidden\" name=\"displayamount\" value=\"$displayamount\"/>";
+		echo "<input type=\"hidden\" name=\"range2\" value=\"$upperBound\"/>";
+		echo "<input type=\"hidden\" name=\"range1\" value=\"$lowerBound\"/>";
+		// submit button
+		//if ($k == $displayamount-1) {
+			echo "<div style=\"text-align:center; margin: 5 0 0 0;\"><input type=\"submit\" value=\"Submit\" name=\"SUBMITTED\"></form></div>";
+		//}
+		echo "<br style=\"clear: both\">";
+	}
+	echo "</div></div>";
+}
+
+function GenerateMatrices($size, $displayamount, $lowerBound, $upperBound) {
 	if ($size == "2x2") {
 		for ($i = 0; $i < $displayamount; $i++) {
 			$matrixarray[$i] = array();
@@ -292,7 +622,7 @@ function generateMatrices($size, $displayamount, $lowerBound, $upperBound) {
 	return $matrixarray;
 }
 
-function retrieveMatrices($size, $displayamount) {
+function RetrieveMatrices($size, $displayamount) {
 	if ($size == "2x2") {
 		for ($i = 0; $i < $displayamount; $i++) {
 			$matrixarray[$i][0] = new Matrix([
@@ -468,5 +798,343 @@ function retrieveMatrices($size, $displayamount) {
 	return $matrixarray;
 }
 
-begin($_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"]);
+function ReconstructMatrices($size, $displayamount, $element) {
+	$matrices = explode("_", $element);
+	if ($size == "2x2") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1]],
+					[$row2[0], $row2[1]]
+				]);
+			}
+		}
+	} elseif ($size == "3x3") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$row3 = explode(",", $matrix[2]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1], $row1[2]],
+					[$row2[0], $row2[1], $row2[2]],
+					[$row3[0], $row3[1], $row3[2]]
+				]);
+			}
+		}
+	} elseif ($size == "4x4") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$row3 = explode(",", $matrix[2]);
+				$row4 = explode(",", $matrix[3]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1], $row1[2], $row1[3]],
+					[$row2[0], $row2[1], $row2[2], $row2[3]],
+					[$row3[0], $row3[1], $row3[2], $row3[3]],
+					[$row4[0], $row4[1], $row4[2], $row4[3]]
+				]);
+			}
+		}
+	} elseif ($size == "5x5") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$row3 = explode(",", $matrix[2]);
+				$row4 = explode(",", $matrix[3]);
+				$row5 = explode(",", $matrix[4]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1], $row1[2], $row1[3], $row1[4]],
+					[$row2[0], $row2[1], $row2[2], $row2[3], $row2[4]],
+					[$row3[0], $row3[1], $row3[2], $row3[3], $row3[4]],
+					[$row4[0], $row4[1], $row4[2], $row4[3], $row4[4]],
+					[$row5[0], $row5[1], $row5[2], $row5[3], $row5[4]]
+				]);
+			}
+		}
+	} elseif ($size == "6x6") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$row3 = explode(",", $matrix[2]);
+				$row4 = explode(",", $matrix[3]);
+				$row5 = explode(",", $matrix[4]);
+				$row6 = explode(",", $matrix[5]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1], $row1[2], $row1[3], $row1[4], $row1[5]],
+					[$row2[0], $row2[1], $row2[2], $row2[3], $row2[4], $row2[5]],
+					[$row3[0], $row3[1], $row3[2], $row3[3], $row3[4], $row3[5]],
+					[$row4[0], $row4[1], $row4[2], $row4[3], $row4[4], $row4[5]],
+					[$row5[0], $row5[1], $row5[2], $row5[3], $row5[4], $row5[5]],
+					[$row6[0], $row6[1], $row6[2], $row6[3], $row6[4], $row6[5]]
+				]);
+			}
+		}
+	} elseif ($size == "7x7") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$row3 = explode(",", $matrix[2]);
+				$row4 = explode(",", $matrix[3]);
+				$row5 = explode(",", $matrix[4]);
+				$row6 = explode(",", $matrix[5]);
+				$row7 = explode(",", $matrix[6]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1], $row1[2], $row1[3], $row1[4], $row1[5], $row1[6]],
+					[$row2[0], $row2[1], $row2[2], $row2[3], $row2[4], $row2[5], $row2[6]],
+					[$row3[0], $row3[1], $row3[2], $row3[3], $row3[4], $row3[5], $row3[6]],
+					[$row4[0], $row4[1], $row4[2], $row4[3], $row4[4], $row4[5], $row4[6]],
+					[$row5[0], $row5[1], $row5[2], $row5[3], $row5[4], $row5[5], $row5[6]],
+					[$row6[0], $row6[1], $row6[2], $row6[3], $row6[4], $row6[5], $row6[6]],
+					[$row7[0], $row7[1], $row7[2], $row7[3], $row7[4], $row7[5], $row7[6]]
+				]);
+			}
+		}
+	} elseif ($size == "8x8") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$row3 = explode(",", $matrix[2]);
+				$row4 = explode(",", $matrix[3]);
+				$row5 = explode(",", $matrix[4]);
+				$row6 = explode(",", $matrix[5]);
+				$row7 = explode(",", $matrix[6]);
+				$row8 = explode(",", $matrix[7]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1], $row1[2], $row1[3], $row1[4], $row1[5], $row1[6], $row1[7]],
+					[$row2[0], $row2[1], $row2[2], $row2[3], $row2[4], $row2[5], $row2[6], $row2[7]],
+					[$row3[0], $row3[1], $row3[2], $row3[3], $row3[4], $row3[5], $row3[6], $row3[7]],
+					[$row4[0], $row4[1], $row4[2], $row4[3], $row4[4], $row4[5], $row4[6], $row4[7]],
+					[$row5[0], $row5[1], $row5[2], $row5[3], $row5[4], $row5[5], $row5[6], $row5[7]],
+					[$row6[0], $row6[1], $row6[2], $row6[3], $row6[4], $row6[5], $row6[6], $row6[7]],
+					[$row7[0], $row7[1], $row7[2], $row7[3], $row7[4], $row7[5], $row7[6], $row7[7]],
+					[$row8[0], $row8[1], $row8[2], $row8[3], $row8[4], $row8[5], $row8[6], $row8[7]]
+				]);
+			}
+		}
+	} elseif ($size == "9x9") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$row3 = explode(",", $matrix[2]);
+				$row4 = explode(",", $matrix[3]);
+				$row5 = explode(",", $matrix[4]);
+				$row6 = explode(",", $matrix[5]);
+				$row7 = explode(",", $matrix[6]);
+				$row8 = explode(",", $matrix[7]);
+				$row9 = explode(",", $matrix[8]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1], $row1[2], $row1[3], $row1[4], $row1[5], $row1[6], $row1[7], $row1[8]],
+					[$row2[0], $row2[1], $row2[2], $row2[3], $row2[4], $row2[5], $row2[6], $row2[7], $row2[8]],
+					[$row3[0], $row3[1], $row3[2], $row3[3], $row3[4], $row3[5], $row3[6], $row3[7], $row3[8]],
+					[$row4[0], $row4[1], $row4[2], $row4[3], $row4[4], $row4[5], $row4[6], $row4[7], $row4[8]],
+					[$row5[0], $row5[1], $row5[2], $row5[3], $row5[4], $row5[5], $row5[6], $row5[7], $row5[8]],
+					[$row6[0], $row6[1], $row6[2], $row6[3], $row6[4], $row6[5], $row6[6], $row6[7], $row6[8]],
+					[$row7[0], $row7[1], $row7[2], $row7[3], $row7[4], $row7[5], $row7[6], $row7[7], $row7[8]],
+					[$row8[0], $row8[1], $row8[2], $row8[3], $row8[4], $row8[5], $row8[6], $row8[7], $row8[8]],
+					[$row9[0], $row9[1], $row9[2], $row9[3], $row9[4], $row9[5], $row9[6], $row9[7], $row9[8]]
+				]);
+			}
+		}
+	} elseif ($size == "10x10") {
+		for ($i = 0; $i < $displayamount; $i++) {
+			for ($j = 0; $j < 2; $j++) {
+				$questions = explode(":", $matrices[$i]);
+				$matrix = explode("|", $questions[$j]);
+				$row1 = explode(",", $matrix[0]);
+				$row2 = explode(",", $matrix[1]);
+				$row3 = explode(",", $matrix[2]);
+				$row4 = explode(",", $matrix[3]);
+				$row5 = explode(",", $matrix[4]);
+				$row6 = explode(",", $matrix[5]);
+				$row7 = explode(",", $matrix[6]);
+				$row8 = explode(",", $matrix[7]);
+				$row9 = explode(",", $matrix[8]);
+				$row10 = explode(",", $matrix[9]);
+				$matrixarray[$i][$j] = new Matrix([
+					[$row1[0], $row1[1], $row1[2], $row1[3], $row1[4], $row1[5], $row1[6], $row1[7], $row1[8], $row1[9]],
+					[$row2[0], $row2[1], $row2[2], $row2[3], $row2[4], $row2[5], $row2[6], $row2[7], $row2[8], $row2[9]],
+					[$row3[0], $row3[1], $row3[2], $row3[3], $row3[4], $row3[5], $row3[6], $row3[7], $row3[8], $row3[9]],
+					[$row4[0], $row4[1], $row4[2], $row4[3], $row4[4], $row4[5], $row4[6], $row4[7], $row4[8], $row4[9]],
+					[$row5[0], $row5[1], $row5[2], $row5[3], $row5[4], $row5[5], $row5[6], $row5[7], $row5[8], $row5[9]],
+					[$row6[0], $row6[1], $row6[2], $row6[3], $row6[4], $row6[5], $row6[6], $row6[7], $row6[8], $row6[9]],
+					[$row7[0], $row7[1], $row7[2], $row7[3], $row7[4], $row7[5], $row7[6], $row7[7], $row7[8], $row7[9]],
+					[$row8[0], $row8[1], $row8[2], $row8[3], $row8[4], $row8[5], $row8[6], $row8[7], $row8[8], $row8[9]],
+					[$row9[0], $row9[1], $row9[2], $row9[3], $row9[4], $row9[5], $row9[6], $row9[7], $row9[8], $row9[9]],
+					[$row10[0], $row10[1], $row10[2], $row10[3], $row10[4], $row10[5], $row10[6], $row10[7], $row10[8], $row10[9]]
+				]);
+			}
+		}
+	}
+	return $matrixarray;
+}
+
+function MySQLMark() {
+	$ansCount = 0;
+	$operation = $_POST["operations"];
+	$displayamount = $_POST["displayamount"];
+	$size = $_POST["msize"];
+	$r1 = $_POST["range1"];
+	$r2 = $_POST["range2"];
+	if ($r1 > $r2) {
+		$upperBound = $r1;
+		$lowerBound = $r2;
+	} else {
+		$lowerBound = $r1;
+		$upperBound = $r2;
+	}
+	$useranswer = "";
+	$actualanswer = "";
+	$matrixelements = "";
+	$matrixarray = RetrieveMatrices($size, $displayamount);
+	for ($n = 0; $n < $displayamount; $n++) {
+		for ($i = 0; $i < $matrixarray[0][0]->getRowCount(); $i++) {
+			for ($j = 0; $j < $matrixarray[0][0]->getColumnCount(); $j++) {
+				if ($operation == "add") {
+					$solution = $matrixarray[$n][0]->addMatrix($matrixarray[$n][1]);
+				} else {
+					$solution = $matrixarray[$n][0]->multiplyMatrix($matrixarray[$n][1]);
+				}
+				
+				$useranswer .= "userAns$n$i$j=" . intval($_POST["userAns$n$i$j"]) . "&";
+				$actualanswer .= "ANS$n$i$j=" . intval($_POST["ANS$n$i$j"]) . "&";
+				
+				$arrayValuea = $matrixarray[$n][0]->get($i, $j);
+				$arrayValueb = $matrixarray[$n][1]->get($i, $j);
+				
+				$matrixelements .= "a$n$i$j=" . $arrayValuea . "&" . "b$n$i$j=" . $arrayValueb . "&";
+				
+				$userAns = intval($_POST["userAns$n$i$j"]);
+				$realAns = intval($_POST["ANS$n$i$j"]);
+				if ($userAns == $realAns) {
+					$colour = "green";
+					$ansCount++;
+				} else {
+					$colour = "red";
+				}
+			}
+		}
+	}
+	if (($ansCount % 4) == 0) {
+		$userAns = $ansCount/4;
+	} else {
+		$userAns = floor($ansCount/4) * 4;
+	}
+	$mark = "$userAns" . "/" . "$displayamount";
+	echo "<h1>Your mark is: $mark</h1>";
+	$uniqueid = $_POST["id"];
+	$studentid = $_POST["studentid"];
+	$firstname = $_POST["first"];
+	$lastname = $_POST["last"];
+	$useranswer = rtrim($useranswer, "&");
+	$actualanswer = rtrim($actualanswer, "&");
+	$matrixelements = rtrim($matrixelements, "&");
+	$link = new mysqli("localhost", "kymot_qgen", "cmpt386isaclass", "kymotsujason_qgen");
+	if (!$link->connect_error) {
+		$sqlSubmit = "INSERT INTO marks (uniqueid, studentid, firstname, lastname, mark, userans, actualans, matrixelements)
+		VALUES ('$uniqueid', '$studentid', '$firstname', '$lastname', '$mark', '$useranswer', '$actualanswer', '$matrixelements')";
+		$link->query($sqlSubmit);
+	} else {
+		echo "Houston, we have a problem <br>";
+		echo "Where the *beep* is the mysql server?";
+	}
+	$link->close();
+}
+
+function ShowMarks($uniqueid) {
+	$link = new mysqli("localhost", "kymot_qgen", "cmpt386isaclass", "kymotsujason_qgen");
+	if (isset($_POST["showresult"])) {
+		Begin("Begin", $uniqueid, $_POST["firstname"], $_POST["lastname"], $_POST["studentid"]);
+	} elseif (!$link->connect_error) {
+		$sqlSelect = "SELECT uniqueid, studentid, firstname, lastname, mark, userans, actualans, matrixelements FROM marks WHERE uniqueid='$uniqueid'";
+		$result = $link->query($sqlSelect);
+		if ($result->num_rows > 0) {
+			while ($row = $result->fetch_assoc()) {
+				echo $row["firstname"] . " " . $row["lastname"] . " (" . $row["studentid"] . "): " . $row["mark"];
+				
+				$useranswer = $row['userans'];
+				$actualanswer = $row['actualans'];
+				$matrixelements = $row['matrixelements'];
+				
+				$id = explode("&", $useranswer);
+				for ($i = 0; $i < count($id); $i++) {
+					$key = explode("=", $id[$i]);
+					echo "<input type=\"hidden\" name=\"$key[0]\" value=\"$key[1]\"/>";
+				}
+				
+				$id = explode("&", $actualanswer);
+				for ($i = 0; $i < count($id); $i++) {
+					$key = explode("=", $id[$i]);
+					echo "<input type=\"hidden\" name=\"$key[0]\" value=\"$key[1]\"/>";
+				}
+				
+				$id = explode("&", $matrixelements);
+				for ($i = 0; $i < count($id); $i++) {
+					$key = explode("=", $id[$i]);
+					echo "<input type=\"hidden\" name=\"$key[0]\" value=\"$key[1]\"/>";
+				}
+				
+				$firstname = $row["firstname"];
+				$lastname = $row["lastname"];
+				$studentid = $row["studentid"];
+				echo "<br>";
+				echo "<form method=\"POST\" id=\"showresult\">";
+				echo "<input type=\"hidden\" name=\"firstname\" value=\"$firstname\"/>";
+				echo "<input type=\"hidden\" name=\"lastname\" value=\"$lastname\"/>";
+				echo "<input type=\"hidden\" name=\"studentid\" value=\"$studentid\"/>";
+				echo "<input type=\"hidden\" name=\"useranswer\" value=\"$useranswer\"/>";
+				echo "<input type=\"hidden\" name=\"actualanswer\" value=\"$actualanswer\"/>";
+				echo "<input type=\"hidden\" name=\"matrixelements\" value=\"$matrixelements\"/>";
+				echo "<input type=\"submit\" value=\"See Answer\" name=\"showresult\">";
+				echo "<br><br>";
+			}
+		} else {
+			echo "Houston, we have a problem <br>";
+			echo "Where the *beep* is the mysql server?";
+		}
+	}
+	$link->close();
+}
+
+if (isset($_POST["STUDENT"]) && isset($_POST["SUBMITTED"])){
+	MySQLMark();
+} elseif (strpos($_SERVER["REQUEST_URI"], "?id=") !== false) {
+	echo "<h1>Class Results:</h1>";
+	$request = $_SERVER["REQUEST_URI"];
+	$uniqueid = substr($_SERVER["REQUEST_URI"], strpos($_SERVER["REQUEST_URI"], "?id=")+4, strlen($request));
+	ShowMarks($uniqueid);
+} else {
+	if (!empty($_GET["STUDENT"])) {
+		Begin($_GET["STUDENT"], $_GET["classid"], $_GET["firstname"], $_GET["lastname"], $_GET["studentid"]);
+	} elseif (!empty($_POST["TEACHER"])){
+		Initiate($_POST["name"], $_POST["class"], $_POST["TEACHER"], $_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"]);
+	} else {
+		Go($_POST["GUEST"], $_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"]);
+	}
+}
+
 ?>
