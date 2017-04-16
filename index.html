@@ -1,8 +1,16 @@
+<!DOCTYPE html>
+
 <html>
 <head>
-<title> QGen </title>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-<script>
+  <title> QGen </title>
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <meta name="viewport" content="width=device-width" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="Keywords" content="linear algebra quiz" />
+  <meta name="description" content="Practice your linear algebra online!." />
+  <meta name="author" content="David Hampson, Jason Yue, Kiet Ho, Sun Kim" />
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+  <script>
 $(document).ready(function(){
   $("#teacher").click(function(){
     $("button").hide();
@@ -25,7 +33,9 @@ $(document).ready(function(){
 });
 </script>
 </head>
+
 <body>
+  
 <h1> Online Matrix Quiz Generator</h1>
 <h2>Are you a...</h2>
 
@@ -50,19 +60,19 @@ $(document).ready(function(){
   <br>
   Please select the desired matrix size:<br>
   <select name="msize">
-  <option value="2x2">2x2</option>
-  <option value="3x3">3x3</option>  
-  <option value="4x4">4x4</option>
-  <option value="5x5">5x5</option>  
-  <option value="6x6">6x6</option>
-  <option value="7x7">7x7</option>  
-  <option value="8x8">8x8</option>
-  <option value="9x9">9x9</option>  
-  <option value="10x10">10x10</option>
+  <option value="2">2x2</option>
+  <option value="3">3x3</option>  
+  <option value="4">4x4</option>
+  <option value="5">5x5</option>  
+  <option value="6">6x6</option>
+  <option value="7">7x7</option>  
+  <option value="8">8x8</option>
+  <option value="9">9x9</option>  
+  <option value="10">10x10</option>
   </select>
   <br>
   Please specify number selection range:<br>
-  <input type="number" name="range1" value=0>x<input type="number" name="range2" value=10>
+  <input type="number" name="range1" value=0>-<input type="number" name="range2" value=10>
   <br>
   How many questions do you want?:<br>
   <input type="number" name="displayamount" value=1>
@@ -70,7 +80,7 @@ $(document).ready(function(){
   <input type="submit" value="Initiate" name="TEACHER">
 </form>
     
-<form id="STUDENT" method="GET"style="display:none" action="Generator.php" style="display:none">
+<form id="STUDENT" method="GET" style="display:none" action="Generator.php">
   First name:<br>
   <input type="text" name="firstname">
   <br>
@@ -95,25 +105,25 @@ $(document).ready(function(){
   <br>
   Please select the desired matrix size:<br>
   <select name="msize">
-  <option value="2x2">2x2</option>
-  <option value="3x3">3x3</option>  
-  <option value="4x4">4x4</option>
-  <option value="5x5">5x5</option>  
-  <option value="6x6">6x6</option>
-  <option value="7x7">7x7</option>  
-  <option value="8x8">8x8</option>
-  <option value="9x9">9x9</option>  
-  <option value="10x10">10x10</option>
+  <option value="2">2x2</option>
+  <option value="3">3x3</option>  
+  <option value="4">4x4</option>
+  <option value="5">5x5</option>  
+  <option value="6">6x6</option>
+  <option value="7">7x7</option>  
+  <option value="8">8x8</option>
+  <option value="9">9x9</option>  
+  <option value="10">10x10</option>
   </select>
   <br>
   Please specify number selection range:<br>
-  <input type="number" name="range1" value=0>x<input type="number" name="range2" value=10>
+  <input type="number" name="range1" value=0>-<input type="number" name="range2" value=10>
   <br>
   How many questions do you want?:<br>
   <input type="number" name="displayamount" value=1>
   <br><br>
   <input type="submit" value="Go" name="GUEST">
 </form>
-
+</div>
 </body>
 </html>
