@@ -18,7 +18,6 @@ if (isset($_POST["STUDENT"]) && isset($_POST["SUBMITTED"])){
 
 // Show class results if there is an id on the url
 } elseif ($_POST["CHECKMARK"]) {
-	echo "<h1>Class Results:</h1>";
 	ShowMarks($_POST["KEY"], $_POST["PASS"]);
 } else {
 	if (!empty($_GET["STUDENT"])) { // Show quiz for id entered
@@ -150,7 +149,7 @@ function ShowQuizStudent($identity, $uniqueid, $firstname, $lastname, $studentid
 function ShowQuiz($matrixarray, $operation, $mode="Input") {
 
 	if ($mode == "Input") {
-		echo "<form><input type=\"submit\" value=\"PDF mode\" class=\"PDFButton\" name=\"PDF\"></form>";
+		echo "<input type=\"submit\" value=\"PDF mode\" class=\"PDFButton\" name=\"PDF\">";
 	}
 
 	$len = count($matrixarray);
@@ -416,7 +415,7 @@ function ShowMarks($uniqueid, $password) {
 		$studentId = $_POST["studentid"];
 		$matrixarray=ReconstructMatrices($_POST["elements"]);
 		
-		echo "<h3>$studentId</h3>";
+		echo "<h3>$studentId results:</h3>";
 		
 		ShowQuiz($matrixarray, $_POST["operation"], "Show Student Answer");
 	
@@ -424,6 +423,7 @@ function ShowMarks($uniqueid, $password) {
 		$sqlSelect = "SELECT * FROM GRADES WHERE quizNum='$uniqueid'";
 		$result = $link->query($sqlSelect);
 		if ($result->num_rows > 0) {
+			echo "<h1>Class Results:</h1>";
 			while ($row = $result->fetch_assoc()) {
 				echo $row["studentNum"] . " : " . $row["grade"];
 				$elements = $row["elements"];
