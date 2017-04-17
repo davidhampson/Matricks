@@ -11,8 +11,13 @@ include("LUDecomposition.php");
 use MCordingley\LinearAlgebra\Matrix;
 
 
-// Grade student quiz if submitted
-if (isset($_POST["STUDENT"]) && isset($_POST["SUBMITTED"])){
+
+
+// Quiz PDF
+if (isset($_POST["QUIZPDF"])) {
+	echo "<h1>Quiz</h1>";
+	ShowQuiz(ReconstructMatrices($_POST["elements"]), $_POST["operation"], PDF);
+} elseif (isset($_POST["STUDENT"]) && isset($_POST["SUBMITTED"])){ // Grade student quiz if submitted
 	SaveMark(RetrieveMatrices($_POST["msize"], $_POST["displayamount"]));
 	backToQgen();
 
@@ -83,9 +88,16 @@ function ShowQuizTeacher($teachname, $classname, $identity, $operation, $size, $
 	echo "<h1>ID: $uniqueid</h1><br>";
 	echo "Students can take the test by going to the homepage (kymotsujason.ca/qgen), <br>
 	pressing the 'student' button and entering the ID. You can check the grades by presing <br>
-	'teacher', then 'check marks'. Don't forget the password you set.";
+	'teacher', then 'check marks'. Don't forget the password you set.<br><br>";
 	
-	echo "<br><h1>Answer Key</h1><br>";
+	echo "<form method=\"POST\" id=\"submission\">";
+	$elements = SaveState($matrixarray, $operation, $displayamount);
+	echo "<input type=\"hidden\" name=\"elements\" value=\"$elements\"/>";
+	echo "<input type=\"hidden\" name=\"operation\" value=\"$operation\"/>";
+	echo "<input type=\"submit\" value=\"Printable Quiz\" class=\"PDFButton\" name=\"QUIZPDF\">";
+	echo "</form>";
+
+	echo "<h1>Answer Key</h1><br>";
 	ShowQuiz($matrixarray, $operation, "Show Answer");
 }
 
