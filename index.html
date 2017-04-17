@@ -18,27 +18,43 @@ $(document).ready(function(){
     $("#guest").hide();
     $("h2").hide();
     $("h4").hide();
+    $("#BACK").show();
     $("#TEACHER1").show();
   });
   $("#student").click(function(){
     $("button").hide();
     $("h2").hide();
     $("h4").hide();
+    $("#BACK").show();
     $("#STUDENT").show();
   });
   $("#guest").click(function(){
     $("button").hide();
     $("h2").hide();
     $("h4").hide();
+    $("#BACK").show();
     $("#GUEST").show();
   });
   $("#create").click(function(){
     $("button").hide();
+    $("#BACK").hide();
+    $("#BACK2").show();
     $("#TEACHER2").show();
   });
   $("#check").click(function(){
     $("button").hide();
+    $("#BACK").hide();
+    $("#BACK2").show();
     $("#TEACHER3").show();
+  });
+  $("#BACK2").click(function(){
+    $("#TEACHER2").hide();
+    $("#TEACHER3").hide();
+    $("#TEACHER1").show();
+    $("#create").show();
+    $("#check").show();
+    $("#BACK2").hide();
+    $("#BACK").show();
   });
 });
 </script>
@@ -56,9 +72,8 @@ $(document).ready(function(){
 <button id="guest">Guest</button>
 
 <div id="TEACHER1" style="display:none">
-  <button id="create">Create quiz</button>
-  <br><br>
-  <button id="check">Check marks</button>
+  <button id="create">Create quiz</button><br>
+  <button id="check" style="margin-top: 20px;">Check marks</button>
 </div>
 
 <form id="TEACHER2" style="display:none" action="Generator.php" method="POST">  
@@ -146,6 +161,16 @@ $(document).ready(function(){
   <br><br>
   <input type="submit" value="Go" name="GUEST">
 </form>
+
+
+<form action="http://kymotsujason.ca/qgen/" id="BACK" style="display:none">
+<input type="submit" style="margin-top:20px;" value="Back"/>
+</form>
+
+<br>
+
+<button id="BACK2" style="display:none; margin-top:20px">Back</button>
+
 </div>
 </body>
 </html>
