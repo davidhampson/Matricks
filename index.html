@@ -13,10 +13,12 @@
   <script>
 $(document).ready(function(){
   $("#teacher").click(function(){
-    $("button").hide();
+    $("#teacher").hide();
+    $("#student").hide();
+    $("#guest").hide();
     $("h2").hide();
     $("h4").hide();
-    $("#TEACHER").show();
+    $("#TEACHER1").show();
   });
   $("#student").click(function(){
     $("button").hide();
@@ -29,6 +31,14 @@ $(document).ready(function(){
     $("h2").hide();
     $("h4").hide();
     $("#GUEST").show();
+  });
+  $("#create").click(function(){
+    $("button").hide();
+    $("#TEACHER2").show();
+  });
+  $("#check").click(function(){
+    $("button").hide();
+    $("#TEACHER3").show();
   });
 });
 </script>
@@ -45,13 +55,22 @@ $(document).ready(function(){
 <h4>or</h4>
 <button id="guest">Guest</button>
 
-<form id="TEACHER" style="display:none" action="Generator.php" method="POST">
+<div id="TEACHER1" style="display:none">
+  <button id="create">Create quiz</button>
+  <br><br>
+  <button id="check">Check marks</button>
+</div>
+
+<form id="TEACHER2" style="display:none" action="Generator.php" method="POST">  
   Name (John Smith, Mr. Smith, Dr. Smith):<br>
   <input type="text" name="name">
   <br>
   Class (Grade 12 Mathematics, MATH101):<br>
   <input type="text" name="class">
   <br>
+  Password to check grades:<br>
+  <input type="text" name="password"><br>
+
   Please select the desired matrix operation:<br>
   <select name="operations">
   <option value="add">Addition</option>  
@@ -77,17 +96,20 @@ $(document).ready(function(){
   How many questions do you want?:<br>
   <input type="number" name="displayamount" value=1>
   <br><br>
-  <input type="submit" value="Initiate" name="TEACHER">
+  <input type="submit" value="Go" name="TEACHER">
 </form>
-    
+
+<form id="TEACHER3" style="display:none" action="Generator.php" method="POST">  
+  Quiz id:<br>
+  <input type="text" name="KEY" value=""><br>
+  Password:<br>
+  <input type="text" name="PASS"><br>
+  <input type="submit" value="Go" name="CHECKMARK">
+</form>
+
 <form id="STUDENT" method="GET" style="display:none" action="Generator.php">
-  First name:<br>
-  <input type="text" name="firstname">
-  <br>
-  Last name:<br>
-  <input type="text" name="lastname">
-  <br>
-  Student ID (if applicable):<br>
+
+  Student ID:<br>
   <input type="text" name="studentid">
   <br>
   Class key (given by your teacher/professor):<br>
