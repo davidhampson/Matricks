@@ -114,13 +114,30 @@ function ShowQuizStudent($identity, $uniqueid, $firstname, $lastname, $studentid
 			$element = $row["elements"];
 		}
 		else {
-			echo "Invalid Quiz ID.";
+			echo "Invalid ID.";
 			backToQgen();
+			$link->close();	
+			return;
+		}
+		$sqlSelect = "SELECT * FROM GRADES WHERE quizNum = '$uniqueid' AND studentNum = '$studentid'";
+		$result = $link->query($sqlSelect);
+		if ($result->num_rows > 0) {
+				echo "$studentid has already completed this quiz.";
+				backToQgen();
+				$link->close();
+				return;
+		}
+		if ($studentid == "") {
+			echo "Invalid student ID (No student ID)";
+			backToQgen();
+			$link->close();
 			return;
 		}
 	} else {
 		echo "Problem with SQL. <br>" . $link->error;
 	}
+
+
 	$matrixarray = ReconstructMatrices($element);	
 	$operation = $matrixarray["operation"];
 	$size = count($matrixarray[0][0][0]);
