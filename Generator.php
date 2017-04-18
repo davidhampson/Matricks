@@ -29,12 +29,15 @@ if (isset($_POST["QUIZPDF"])) {
 		ShowQuizStudent($_GET["STUDENT"], $_GET["classid"], $_GET["firstname"], $_GET["lastname"], $_GET["studentid"]);
 	} elseif (!empty($_POST["TEACHER"])){ // Shows the teacher the quiz he created
 		ShowQuizTeacher($_POST["name"], $_POST["class"], $_POST["TEACHER"], $_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"], $_POST["password"]);
-	} else {
+	} elseif (isset($_POST["GUEST"])) {
 		if (isset($_POST["PDF"])) { // PDF mode
 			GenerateQuiz($_POST["GUEST"], $_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"], "PDF");
 		} else { // Guest mode
 			GenerateQuiz($_POST["GUEST"], $_POST["operations"], $_POST["msize"], $_POST["range1"], $_POST["range2"], $_POST["displayamount"]);
 		}
+	} else { // nothing to display
+		echo "Nothing to display.";
+		backToQgen();
 	}
 }
 
